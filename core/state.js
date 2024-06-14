@@ -4,15 +4,17 @@ const _state = {
         rows: 4,
     },
     points: {
-        googlePoints: 10,
-        playerPoints: [1, 2]
+        googlePoints: 0,
+        playerPoints: [1, 2],
+        pointsToLoose: 5,
     },
     positions: {
         google: {
             x: 2, y: 2
         },
         players: [{x: 3, y: 3}, {x: 2, y: 1}],
-    }
+    },
+    googleJumpInterval: 2000,
 }
 
 let _observers = []
@@ -20,18 +22,41 @@ let _observers = []
 export function subscribe(observer) {
     _observers.push(observer)
 }
+
 export function unsubscribe(observer) {
-    _observers = _observers.filter(O=>O!==observer)
-}
-function _notifyObservers() {
-    _observers.forEach(O=>O())
+    _observers = _observers.filter(O => O !== observer)
 }
 
-setInterval(()=>{
-    _state.positions.google={x: 2, y: 3}
+function _notifyObservers() {
+    _observers.forEach(O => O())
+}
+
+function generateNewIntegerNumber(min, max) {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function jumpGoogleToNewPosition() {
+    const newPosition = {..._state.positions.google}
+    do {
+        newPosition.x = generateNewIntegerNumber(0, _state.gridSize.columns - 1)
+        newPosition.y = generateNewIntegerNumber(0, _state.gridSize.rows - 1)
+        var isNewPositionMatchWithCurrentGooglePosition = newPosition.x === _state.positions.google.x && newPosition.y === _state.positions.google.y
+        var isNewPositionMatchWithCurrentPlayer1Position = newPosition.x === _state.positions.players[0].x && newPosition.y === _state.positions.players[0].y
+        var isNewPositionMatchWithCurrentPlayer2Position = newPosition.x === _state.positions.players[1].x && newPosition.y === _state.positions.players[1].y
+    } while (isNewPositionMatchWithCurrentGooglePosition || isNewPositionMatchWithCurrentPlayer1Position || isNewPositionMatchWithCurrentPlayer2Position)
+    _state.positions.google = newPosition
+}
+let googleJumpInterval
+googleJumpInterval = setInterval(() => {
     _state.points.googlePoints++
+    if(_state.points.googlePoints === _state.points.pointsToLoose){
+        clearInterval(googleJumpInterval)
+    }
+    jumpGoogleToNewPosition()
     _notifyObservers()
-}, 2000)
+}, _state.googleJumpInterval)
 
 export const getGooglePoints = async () => _state.points.googlePoints
 export const getPlayerPoints = async (playerNumber) => {
