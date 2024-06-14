@@ -1,5 +1,12 @@
 import {AppComponents} from "./components/app.components.js";
+import {subscribe, unsubscribe} from "../core/state.js";
 
 const rootElement = document.getElementById('root')
-rootElement.innerHTML=''
-rootElement.append(AppComponents())
+
+function renderApp(){
+    rootElement.innerHTML=''
+    rootElement.append(AppComponents().element)
+}
+renderApp()
+
+subscribe(renderApp)

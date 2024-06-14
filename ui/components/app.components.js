@@ -5,10 +5,13 @@ import {ResultComponents} from "./ResultPanel/Result.components.js";
 export function AppComponents(){
     debugger
     const element = document.createElement('div')
-    const gridElement = GridComponents()
-    const settingElement = SettingComponents()
-    const resultElement = ResultComponents()
+    render(element)
+    return {element}
+}
+async function render(element){
+    const gridComponent = GridComponents()
+    const settingComponent = SettingComponents()
+    const resultComponent = ResultComponents()
 
-    element.append(settingElement, resultElement, gridElement)
-    return element
+    element.append(settingComponent.element, resultComponent.element, gridComponent.element)
 }
